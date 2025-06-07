@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Números Cistercienses</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Gerador de Números Cistercienses</h1>
+      <p class="subtitle">Explore o sistema numérico medieval dos monges cistercienses</p>
+    </header>
+
+    <main class="main-content">
+      <section class="card generator-card">
+        <h2><span class="icon">🖌️</span> Gerar Número</h2>
+        <form id="numberForm" class="form">
+          <div class="input-group">
+            <input type="number" name="number" id="numberInput" min="1" max="9999" 
+                   placeholder="Digite um número (1-9999)" required class="form-input" />
+            <button type="submit" class="form-button primary">Gerar</button>
+          </div>
+        </form>
+        <div id="result" class="result-container"></div>
+      </section>
+
+      <section class="card recognizer-card">
+        <h2><span class="icon">🔍</span> Reconhecer Número</h2>
+        <form id="uploadForm" enctype="multipart/form-data" class="form">
+          <div class="file-upload">
+            <label for="imageInput" class="file-label">
+              <span class="file-button">Escolher imagem</span>
+              <span id="fileName" class="file-name">Nenhum arquivo selecionado</span>
+            </label>
+            <input type="file" name="image" id="imageInput" accept="image/*" required class="file-input" />
+          </div>
+          <button type="submit" class="form-button secondary">Enviar imagem</button>
+        </form>
+        <div id="uploadResult" class="result-container"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Sistema numérico usado pelos monges cistercienses no século XIII</p>
+    </footer>
+  </div>
+
+  <script>
+    // Atualizar nome do arquivo selecionado
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+      const fileName = e.target.files[0] ? e.target.files[0].name : 'Nenhum arquivo selecionado';
+      document.getElementById('fileName').textContent = fileName;
+    });
+
+    const form = document.getElementById('numberForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const number = document.getElementById('numberInput').value;
+      const resultDiv = document.getElementById('result');
+      
+      resultDiv.innerHTML = '<div class="loading">Gerando...</div>';
+
+      try {
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ number })
+        });
+
+        if (!res.ok) throw new Error('Erro na requisição');
+
+        const data = await res.json();
+        resultDiv.innerHTML = `
+          <div class="result-content">
+            <h3>Número: ${number}</h3>
+            <div class="image-container">
+              <img src="${data.image}" alt="Número cisterciense gerado" class="result-image" />
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML = '<div class="error">Erro ao gerar imagem. Tente novamente.</div>';
+      }
+    });
+
+    const uploadForm = document.getElementById('uploadForm');
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resultDiv = document.getElementById('uploadResult');
+      resultDiv.innerHTML = '<div class="loading">Processando imagem...</div>';
+
+      try {
+        const formData = new FormData();
+        const fileInput = document.getElementById('imageInput');
+        formData.append('image', fileInput.files[0]);
+
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Erro na requisição');
+
+        const data = await res.json();
+        resultDiv.innerHTML = `
+          <div class="result-content">
+            <h3>Resultado</h3>
+            <p><strong>Número identificado:</strong> <span class="number-result">${data.number}</span></p>
+            <p><strong>Componentes:</strong> ${data.components.join(' + ')}</p>
+            <p class="message">${data.message}</p>
+          </div>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML = '<div class="error">Erro ao reconhecer a imagem. Verifique o formato e tente novamente.</div>';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -63,15 +63,18 @@ app.post('/upload', upload.single('image'), async (req, res) => {
           console.error('Erro no script Python:', errorLog);
           return res.status(500).send('Erro ao processar a imagem.');
         }
-  
+
         const [number, score] = result.trim().split('|');
-  
+        const decomposed = decomposeNumber(Number(number));
+
         res.json({
           number: Number(number),
           score: parseFloat(score),
+          components: decomposed,
           message: `A imagem inserida representa o número ${number} (similaridade: ${score}).`
         });
       });
+
   
     } catch (err) {
       console.error(err);

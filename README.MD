@@ -41,12 +41,19 @@ A aplicação consegue gerar a imagem de um número cisterciense a partir de um 
     npm install
 ```
 
+- Rode o servidor com o comando 
 
+```plaintext
+    node app.js
+```
+    Ou através da opção de debbuging (F5) No VsCode
+
+- Acesse a aplicação através do [http://localhost:3000](http://localhost:3000)
 
 ---
 
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```plaintext
 AlgoritmoCistercinese/
